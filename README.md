@@ -68,8 +68,8 @@ The system periodically checks incoming emails, extracts attachments, analyzes c
 
 ## 📂 Project Files
 
-- `workflow.json` → n8n workflow export file  
-- `screenshot.png` → Workflow preview image  
+[n8n woekflow file](workflow.json)
+
 
 ---
 
@@ -100,12 +100,6 @@ The system periodically checks incoming emails, extracts attachments, analyzes c
 - Reduces manual workload  
 - Improves response speed  
 - Organizes email data efficiently  
-
----
-
-## 🔗 Demo / Project Link
-
-👉 [Add your live demo or workflow link here]
 
 ---
 
