@@ -1,0 +1,773 @@
+{
+  "name": "AI Email Responder Agent",
+  "nodes": [
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "fddd4b17-0929-4068-a459-bf8907f15644",
+              "leftValue": "={{ Object.keys($binary || {}).length }}",
+              "rightValue": 0,
+              "operator": {
+                "type": "number",
+                "operation": "gt"
+              }
+            }
+          ],
+          "combinator": "and"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        -128,
+        32
+      ],
+      "id": "76ae8569-2ffe-4917-a450-fc9794b40e0f",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfa3bda8-ca3b-48c1-96f1-1bf44218118d",
+              "name": "ID",
+              "value": "={{ $json.threadId }}",
+              "type": "string"
+            },
+            {
+              "id": "5f33cc7d-797e-4211-956e-b34ac3d77d78",
+              "name": "Name",
+              "value": "={{ $json.from.value[0].name }}",
+              "type": "string"
+            },
+            {
+              "id": "60f046a7-4f0f-43d3-a122-e558b9f594c9",
+              "name": "From",
+              "value": "={{ $json.from.value[0].address }}",
+              "type": "string"
+            },
+            {
+              "id": "19672cb6-c27a-4b51-b9ad-2289183d6824",
+              "name": "Subject",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "2fb99f07-8e9a-49ed-a0e5-136d35ac2350",
+              "name": "Body",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -64,
+        304
+      ],
+      "id": "75eb88cc-46b4-435b-be9e-c867e27b91c7",
+      "name": "Edit Fields 02",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "assignments": {
+          "assignments": [
+            {
+              "id": "cfa3bda8-ca3b-48c1-96f1-1bf44218118d",
+              "name": "ID",
+              "value": "={{ $json.threadId }}",
+              "type": "string"
+            },
+            {
+              "id": "5f33cc7d-797e-4211-956e-b34ac3d77d78",
+              "name": "Name",
+              "value": "={{ $json.from.value[0].name }}",
+              "type": "string"
+            },
+            {
+              "id": "60f046a7-4f0f-43d3-a122-e558b9f594c9",
+              "name": "From",
+              "value": "={{ $json.from.value[0].address }}",
+              "type": "string"
+            },
+            {
+              "id": "19672cb6-c27a-4b51-b9ad-2289183d6824",
+              "name": "Subject",
+              "value": "={{ $json.subject }}",
+              "type": "string"
+            },
+            {
+              "id": "2fb99f07-8e9a-49ed-a0e5-136d35ac2350",
+              "name": "Body",
+              "value": "={{ $json.text }}",
+              "type": "string"
+            },
+            {
+              "id": "3a4f5060-199d-43f0-958a-2357dd17d4f5",
+              "name": "Attachment",
+              "value": "=attachment_0",
+              "type": "binary"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.set",
+      "typeVersion": 3.4,
+      "position": [
+        -144,
+        -176
+      ],
+      "id": "26baaa2e-a7f5-455d-8864-66fdaccb3225",
+      "name": "Edit Fields 01",
+      "notesInFlow": false
+    },
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {
+              "field": "hours"
+            }
+          ]
+        }
+      },
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1.3,
+      "position": [
+        -640,
+        32
+      ],
+      "id": "03e65f46-513a-43b6-8d4b-a781dc5fa31e",
+      "name": "Schedule Every 1H"
+    },
+    {
+      "parameters": {
+        "operation": "getAll",
+        "returnAll": true,
+        "simple": false,
+        "filters": {
+          "readStatus": "unread",
+          "receivedAfter": "2026-03-14T00:00:00"
+        },
+        "options": {
+          "downloadAttachments": true
+        }
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        -384,
+        32
+      ],
+      "id": "4bb99020-640c-4a61-b952-aa198c4c67e9",
+      "name": "Get  Messages",
+      "webhookId": "c37d1cd6-607e-4d06-9d7f-c2fc94a76bcf",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "pCHwQOWCwKZWsd57",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=\"You are an expert Email Classifier for. Your task is to analyze the following email and its attached files to determine the sender's intent.\n\nInstructions:\nRead the Email Subject and Body carefully.\nAnalyze the content of the provided attachments (e.g., PDFs, Images, or Documents).\nCategorize the request into EXACTLY ONE of the following categories:\nPromotion: If a brand wants the customer to promote their products.\nMeetings: If someone wants to schedule a meeting or call.\nCollaboration: If someone wants to partner or work together on a project.\nInquiry: If someone is asking a question or seeking information.\n\nInput Data:\n\nSubject: {{ $json.Subject }}\n\nBody: {{ $json.Body }}\n\nAttachment Content:  [The AI should analyze the binary files mapped to this node]\n\n\nConstraint: Output ONLY the category name. Do not include any explanation or punctuation.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        336,
+        -288
+      ],
+      "id": "cb9c31f0-1de4-4ae8-92a2-5d4bde77dc22",
+      "name": "AI Brain 01"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are an expert Email Classifier for. Your task is to analyze the following email text to determine the sender's intent.\n\nInstructions:\nRead the Email Subject and Body carefully.\nCategorize the request into EXACTLY ONE of the following categories:\nPromotion: If a brand wants the customer to promote their products.\nMeetings: If someone wants to schedule a meeting or call.\nCollaboration: If someone wants to partner or work together on a project.\nInquiry: If someone is asking a question or seeking information.\n\nInput Data:\n\nSubject: {{ $json.Subject }}\n\nBody: {{ $json.Body }}\n\nConstraint: Output ONLY the category name. Do not include any explanation or punctuation.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        400,
+        96
+      ],
+      "id": "9ff65258-3f7c-4d1a-9a2c-9046ba928a5f",
+      "name": "AI Brain 02"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me",
+      "typeVersion": 1,
+      "position": [
+        112,
+        -304
+      ],
+      "id": "a1598e8d-4351-4c36-994e-abf845c8a3e5",
+      "placeholder": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        224,
+        -176
+      ],
+      "id": "255e9cad-b583-41aa-ab42-a798b29500ae",
+      "name": "loop 01"
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.noOp",
+      "name": "Replace Me1",
+      "typeVersion": 1,
+      "position": [
+        128,
+        320
+      ],
+      "id": "90ec9160-8d8f-4606-b23a-fa6bff13654c",
+      "placeholder": true
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [
+        64,
+        112
+      ],
+      "id": "4d22e905-1b36-486d-b344-a5e60db29749",
+      "name": "Loop 02"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "gpt-5-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        336,
+        -64
+      ],
+      "id": "f6b9652c-c5b9-455f-8d5d-61346215ab3b",
+      "name": "Email Analysis 01",
+      "credentials": {
+        "openAiApi": {
+          "id": "KqUDAlQF0dHh667w",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {},
+      "type": "n8n-nodes-base.merge",
+      "typeVersion": 3.2,
+      "position": [
+        576,
+        -64
+      ],
+      "id": "de0911aa-4746-4bee-b127-b0afef07dc1d",
+      "name": "Merge"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=You are a Professional AI Email Assistant for \"AutomateIQ Labs\". Your task is to write a polite and professional reply to an email based on its assigned category.\n\nContext:\n- Sender Name: {{ $('Get  Messages').item.json.from.value[0].name }}\n\n- Email Subject: {{ $('Get  Messages').item.json.text }}\n\n- Assigned Category: {{ $json.output }}\n\n\nInstructions for Reply Content:\nBased on the \"Assigned Category\", follow these specific rules for the reply:\n\n1. If Category is \"Promotion\":\n   Reply: \"Thank you for reaching out. I have received your promotion request. I am interested in hearing more and will contact you very soon to discuss the details.\"\n\n2. If Category is \"Inquiry\":\n   Reply: \"Thank you for your email. I have understood your question and what you would like to know. I am looking into it and will get back to you shortly with more information.\"\n\n3. If Category is \"Meetings\":\n   Reply: \"Thank you for the invitation. I am definitely interested in a meeting. I will contact you soon to fix a suitable date and time for our discussion.\"\n\n4. If Category is \"Collaboration\":\n   Reply: \"Thank you for your collaboration request. I have received the details and will carefully consider everything. I will send you a follow-up email once I have reviewed it.\"\n\nGuidelines:\n- Maintain a professional, helpful, and friendly tone.\n- Start with a proper greeting (e.g., \"Hello [Sender Name]\").\n- End with a professional sign-off (e.g., \"Best regards, AutomateIQ Labs Team\").\n- Output ONLY the final reply text. Do not add any extra explanations or notes.",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        688,
+        256
+      ],
+      "id": "964eaa6d-8856-4a12-ba0f-7a096ad1cc58",
+      "name": "AI Brain 03"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "value": "gpt-4o-mini",
+          "mode": "list",
+          "cachedResultName": "gpt-4o-mini"
+        },
+        "builtInTools": {},
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatOpenAi",
+      "typeVersion": 1.3,
+      "position": [
+        688,
+        464
+      ],
+      "id": "dabc041b-c20c-4508-9e80-d466f9a8dbb2",
+      "name": "Email Responder",
+      "credentials": {
+        "openAiApi": {
+          "id": "KqUDAlQF0dHh667w",
+          "name": "n8n free OpenAI API credits"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "reply",
+        "messageId": "={{ $('Get  Messages').item.json.threadId }}",
+        "emailType": "text",
+        "message": "={{ $json.output }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        848,
+        32
+      ],
+      "id": "36f9f4f7-e96d-4e3a-bb14-e4fb5c894821",
+      "name": "Reply to a message",
+      "webhookId": "5cc0363b-4b47-4190-ab55-c791bd3b9883",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "pCHwQOWCwKZWsd57",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "create",
+        "base": {
+          "__rl": true,
+          "value": "appO2zbe7rH1rubVp",
+          "mode": "list",
+          "cachedResultName": "Email Data test",
+          "cachedResultUrl": "https://airtable.com/appO2zbe7rH1rubVp"
+        },
+        "table": {
+          "__rl": true,
+          "value": "tblHefbZudEoLG7kg",
+          "mode": "list",
+          "cachedResultName": "Table 1",
+          "cachedResultUrl": "https://airtable.com/appO2zbe7rH1rubVp/tblHefbZudEoLG7kg"
+        },
+        "columns": {
+          "mappingMode": "defineBelow",
+          "value": {
+            "Name": "={{ $('Get  Messages').item.json.from.value[0].name }}",
+            "Email": "={{ $('Get  Messages').item.json.from.value[0].address }}",
+            "Message ID": "={{ $('Get  Messages').item.json.threadId }}",
+            "Date": "={{ $('Get  Messages').item.json.date }}",
+            "Message": "={{ $('Get  Messages').item.json.text }}",
+            "Catagory": "={{ $('Merge').item.json.output }}",
+            "Reply": "={{ $('AI Brain 03').item.json.output }}"
+          },
+          "matchingColumns": [],
+          "schema": [
+            {
+              "id": "Name",
+              "displayName": "Name",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Email",
+              "displayName": "Email",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message",
+              "displayName": "Message",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Catagory",
+              "displayName": "Catagory",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Reply",
+              "displayName": "Reply",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "string",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Date",
+              "displayName": "Date",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "dateTime",
+              "readOnly": false,
+              "removed": false
+            },
+            {
+              "id": "Message ID",
+              "displayName": "Message ID",
+              "required": false,
+              "defaultMatch": false,
+              "canBeUsedToMatch": true,
+              "display": true,
+              "type": "number",
+              "readOnly": false,
+              "removed": false
+            }
+          ],
+          "attemptToConvertTypes": false,
+          "convertFieldsToString": false
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.airtable",
+      "typeVersion": 2.1,
+      "position": [
+        784,
+        -144
+      ],
+      "id": "2d173194-7608-4cc7-9e7f-1f7c0463d45b",
+      "name": "Data Record",
+      "credentials": {
+        "airtableTokenApi": {
+          "id": "GvctTsRWogfJyC8W",
+          "name": "Airtable Personal Access Token account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "operation": "markAsRead",
+        "messageId": "={{ $('Get  Messages').item.json.threadId }}"
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        864,
+        -304
+      ],
+      "id": "c65d0fcc-8e0a-4318-83a9-40e6b1546f23",
+      "name": "Mark a message as read",
+      "webhookId": "7f1cb80b-de2e-477b-81cf-d4da2aa82c3d",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "pCHwQOWCwKZWsd57",
+          "name": "Gmail OAuth2 API"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-2.5-computer-use-preview-10-2025",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        400,
+        304
+      ],
+      "id": "70312364-9be0-4123-9c3d-a84ef0b3f1db",
+      "name": "Email Analysis )2",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "6f1rocJWYOjZIoKg",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Edit Fields 01",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Edit Fields 02",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields 01": {
+      "main": [
+        [
+          {
+            "node": "loop 01",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Schedule Every 1H": {
+      "main": [
+        [
+          {
+            "node": "Get  Messages",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Get  Messages": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Edit Fields 02": {
+      "main": [
+        [
+          {
+            "node": "Loop 02",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me": {
+      "main": [
+        [
+          {
+            "node": "loop 01",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "loop 01": {
+      "main": [
+        [
+          {
+            "node": "AI Brain 01",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replace Me",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Replace Me1": {
+      "main": [
+        [
+          {
+            "node": "Loop 02",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Loop 02": {
+      "main": [
+        [
+          {
+            "node": "AI Brain 02",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Replace Me1",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Analysis 01": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Brain 01",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Brain 01": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Brain 02": {
+      "main": [
+        [
+          {
+            "node": "Merge",
+            "type": "main",
+            "index": 1
+          }
+        ]
+      ]
+    },
+    "Merge": {
+      "main": [
+        [
+          {
+            "node": "AI Brain 03",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Responder": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Brain 03",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Brain 03": {
+      "main": [
+        [
+          {
+            "node": "Reply to a message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Reply to a message": {
+      "main": [
+        [
+          {
+            "node": "Data Record",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Data Record": {
+      "main": [
+        [
+          {
+            "node": "Mark a message as read",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Email Analysis )2": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Brain 02",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate",
+    "availableInMCP": false
+  },
+  "versionId": "97547ba8-674e-4087-a274-bf11a267756e",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "dfd8591c7d4cab2ad522759c559fcf3a876733d6125749700472f8f9a6b3aa28"
+  },
+  "id": "0wvsf4LGl1xj5aaH",
+  "tags": []
+}
